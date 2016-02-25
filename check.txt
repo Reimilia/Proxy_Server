@@ -1,0 +1,10 @@
+GET /auth/authorize?scope=user%2FSequence.read+user%2FObservation.read+user%2FCondition.read+user%2FPatient.read+launch%3A157&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Frecv_redirect&response_type=code&client_id=5974e104-619a-4970-b8d8-7b0a813983fa HTTP/1.1
+Host: localhost:9090
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:44.0) Gecko/20100101 Firefox/44.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Referer: http://localhost:9090/?redirect=http%3A%2F%2Flocalhost%3A9090%2Fauth%2Fauthorize%3Fscope%3Duser%252FSequence.read%2Buser%252FObservation.read%2Buser%252FCondition.read%2Buser%252FPatient.read%26redirect_uri%3Dhttp%253A%252F%252Flocalhost%253A8000%252Frecv_redirect%26response_type%3Dcode%26client_id%3D5974e104-619a-4970-b8d8-7b0a813983fa
+Cookie: session_id=dcd79496-1dae-413a-bec6-3480b9b59c41
+Connection: keep-alive
+
