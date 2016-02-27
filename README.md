@@ -22,7 +22,9 @@ original server will still get the same result without any filterance.
     PRIVACY_BASE : base url to redirect to the **Privacy_server**
     SERVER_BASE : base url to redirect to the remote data server
 
-4. Make sure 4 parts are ready, and run your client app with reidrect path:
+4. Run Socket.py to setup proxy server
+
+5. Make sure 4 parts are ready, and run your client app with reidrect path:
 <center>http://localhost:9090 </center>
    Then the proxy server will automaticlly use data in privacy_server and wrap the json data from
    remote server.
