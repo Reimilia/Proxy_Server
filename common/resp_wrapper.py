@@ -1,12 +1,11 @@
 from utils import api_call,RESERVED_WORD,STATUS_ERROR
-from json_parser import json2list,list2json,listequal
+from json_parser import json2list,list2json,listequal,json_reduce_structure
 import json
 from urllib import urlencode
-from . import  SERVER_BASE,PRIVACY_BASE
+from . import SERVER_BASE,PRIVACY_BASE
 from resource import is_single_resource,is_multi_resource
-
-def get_patient_ID(resource, auth_header):
-    #resource is a json data
+def get_patient_ID(dict_resource, auth_header):
+    #resource is a dict data
     '''
     This program intends to get resource's
         subject reference of Patient.
@@ -28,16 +27,17 @@ def get_patient_ID(resource, auth_header):
         return "Http_403_error"
     '''
     # In this demo, however, we simplify this process by assuming certain scenario
-    if resource.has_key('reference'):
-        for ref in resource['reference']:
-            if ref.has_key('subject') and ref['subject']=='Patient':
+    if 'reference' in dict_resource:
+        for ref in dict_resource['reference']:
+            if ref.has_key('subject') and ref['subject'] == 'Patient':
 		        patient_id = ref['text']
-    elif resource.has_key('patient'):
-        ref=resource['patient']['reference']
-        patient_id = ref.split('/')[1]
+    elif 'id' in dict_resource and 'resourceType' in dict_resource and dict_resource['resourceType']=='Patient':
+        patient_id = dict_resource['id']
+    elif 'Identifier' in dict_resource and 'resourceType' in dict_resource and dict_resource['resourceType']=='Patient':
+        patient_id = dict_resource['Identifer']
     else:
-        patient_id = STATUS_ERROR
-
+        patient_id = 0
+    #print patient_id
     return patient_id
 
 
@@ -46,11 +46,13 @@ def get_policy_data(patient_id, auth_header):
     forwarded_args['_format'] = 'json'
     api_endpoint = 'Privacy/%s?%s' % (patient_id, urlencode(forwarded_args, doseq=True))
     resp = api_call(PRIVACY_BASE,api_endpoint, auth_header)
-    return resp.json()
+    try:
+        return resp.json()['Resource']
+    except:
+        return 'Nope'
 
 def retrieve(policy, raw):
     '''
-
     :param policy: a list to identify a item of patient's info, the policy[-1] is the attribute of the item
     :param raw: result of json2list()
     :return: return processed patient's info
@@ -66,27 +68,32 @@ def retrieve(policy, raw):
         #policy[-1] = 'Not_Found'
         return u'Not_Found',0
 
-def cover_protected_data(data_list, resource, privacy_policy, status='full'):
-    '''
 
-    :param data_list: what part we want to display, json data
-    :param resource: what we get in the proxy forwarding process, json data
-    :param patient_ID: Identifer of specific patient
-    :param status: Leave to extension
+
+def cover_protected_data(dict_list, resource, privacy_policy, status='full'):
+    '''
+    :param display_list:
+    :param resource:
+    :param privacy_policy:
+    :param status:
     :return:
     '''
 
     policy_data = json2list(privacy_policy,RESERVED_WORD)
+    json_reduce_structure(policy_data)
 
-    if type(data_list) is dict:
-        data_list = json2list(data_list, RESERVED_WORD)
+    json_reduce_structure(dict_list)
+    data_list = json2list(dict_list, RESERVED_WORD)
 
     if isinstance(resource['resourceType'], unicode):
         s=resource['resourceType']
     else:
         s=unicode(resource['resourceType'],"utf-8")
+
+    json_reduce_structure(resource)
     resource_data = json2list(resource,RESERVED_WORD)
-    #print json.dumps(resource, indent=4)
+
+
     for i in range(len(resource_data)):
         resource_data[i].insert(0,s)
 
@@ -94,10 +101,9 @@ def cover_protected_data(data_list, resource, privacy_policy, status='full'):
 
     for i in range(len(data)):
         data[i].insert(0,s)
-
-    for item in data:
-        print item
-
+    #print resource
+    #print data
+    #print policy_data
     #If the query is only part of data,then do the intersection
     for i in range(len(data)):
         if data[i][1] == 'text' or data[i][1] == 'resourceType':
@@ -112,16 +118,17 @@ def cover_protected_data(data_list, resource, privacy_policy, status='full'):
     for i in range(len(data)):
         if data[i][1]=='text' or data[i][1]=='resourceType':
             continue
-        tmp =retrieve(data[i],policy_data)
+        tmp = retrieve(data[i],policy_data)
         # Not found or unmasked means we should not change the value
         if tmp[0] == 'Mask':
-            #Here we need to filter the policy
+            # Here we need to filter the policy
             data[i][-1] = 'Protected data due to privacy policy'
 
     for i in range(len(data)):
         del data[i][0]
 
-    return list2json(data,RESERVED_WORD)
+    result = list2json(data,RESERVED_WORD)
+    return result
 
 def filter_policy(resource, auth):
     '''
@@ -130,12 +137,20 @@ def filter_policy(resource, auth):
     :return:
     '''
     wrapped_data = resource
-    if is_single_resource(resource):
+    dict_resource = json.loads(resource)
+
+    # Judge type of bundled resource
+    if is_single_resource(dict_resource):
         #Deal with a single resource
-        patient_ID = get_patient_ID(resource, auth)
-        privacy_data = get_policy_data(resource, auth)
-        wrapped_data=cover_protected_data(resource, resource, privacy_data)
-    elif is_multi_resource(resource):
+        patient_ID = get_patient_ID(dict_resource, auth)
+        privacy_data = get_policy_data(patient_ID, auth)
+        if type(privacy_data)==str and privacy_data=='Nope':
+            pass
+        else:
+            resp=cover_protected_data(dict_resource, dict_resource, privacy_data)
+            print resp
+            wrapped_data= json.dumps(resp)
+    elif is_multi_resource(dict_resource):
         pass
     else:
         #In this case it is worthless to bundle it

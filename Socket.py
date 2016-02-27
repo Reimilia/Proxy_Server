@@ -11,7 +11,7 @@ from config import SERVER_BASE
 from flask import Flask
 from flask import request,redirect
 from urllib import urlencode
-#from resources import filter_policy
+from common import filter_policy
 
 dispatcher = Flask(__name__)
 
@@ -46,13 +46,14 @@ def wrap_data(resource,auth_header):
     '''
     # To do : xml data is not fully supported since we did not figure out how to check data_type in
     # Response class
-    if (request.status_code!= 200):
+    if (resource.status_code!= 200):
         return resource._content
     try:
         #print type(resource._content)
         #print type(json.dumps(resource.json()))
-        return json.dumps(resource.json())
-        #wrapped_content=filter_policy(json.dumps(resource.json()),auth_header)
+        #return json.dumps(resource.json())
+        wrapped_content=filter_policy(json.dumps(resource.json()),auth_header)
+        return wrapped_content
     except:
         return resource._content
 
@@ -63,6 +64,7 @@ def request_handler(request_url):
         raise ForwardError
     if request.method == 'GET':
         auth_header = parse_request_headers()
+        #print request.args
         resp = requests.get('%s/api/%s?%s' %(SERVER_BASE, request_url,urlencode(request.args,doseq=True)), headers=auth_header)
         return wrap_data(resp,auth_header)
     elif request.method == 'POST':
@@ -103,7 +105,7 @@ def request_forwarder(request_url):
         raise ForwardError
 
 
-@dispatcher.route('/privacy/<path:request_url>', methods = KNOWN_HTTP_METHOD)
+@dispatcher.route('/Privacy/<path:request_url>', methods = KNOWN_HTTP_METHOD)
 def privacy_request(request_url):
     '''
     Well, for request to Privacy_Server, at this proxy server we will only redirect and send request to

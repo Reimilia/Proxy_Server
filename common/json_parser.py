@@ -3,6 +3,7 @@ import copy
 
 
 
+
 formtable = {"name":[u'name'],
              "gender":[u'gender'],
              "contact":[u'contact'],
@@ -17,7 +18,7 @@ def is_reserved_layer(dict,reserved_word):
 def json_reduce_layer(source,reserved_word):
     if type(source)==list:
         if is_reserved_layer(source[0],reserved_word):
-            #print source
+
             for i in range(len(source)):
                 temp_dict = source.pop(0);
 
@@ -25,14 +26,14 @@ def json_reduce_layer(source,reserved_word):
 
                     source.append(temp_dict[temp_key][0])
 
-            #print source
+
             json_reduce_layer(source,reserved_word)
         else:
             for item in source:
                 json_reduce_layer(item,reserved_word)
     elif type(source)==dict:
         for key in source:
-            print source[key]
+            #print source[key]
             json_reduce_layer(source[key],reserved_word)
 
 '''
@@ -89,7 +90,6 @@ def json_write(source,list,reserved_word):
 
 def list2json(source,reserved_word):
     '''
-
     :param source: a list of list
     :return: a dict which can be converted into json str use json.dumps()
     '''
@@ -127,7 +127,6 @@ def listequal(list1,list2):
 
 def extend(prefix, extendlist, raw):
     '''
-
     :param prefix: list of key, there maybe more than one item  corresponding to it
     :param extendlist:extended item will append to this list
     :param raw:patient's info comeform
@@ -147,7 +146,6 @@ def form2list(form,formtable,raw):
 
 def retrieve(policy, raw):
     '''
-
     :param policy: a list to identify a item of patient's info, the policy[-1] is the attribute of the item
     :param raw: result of json2list()
     :return: return processed patient's info
@@ -168,7 +166,6 @@ def retrieve(policy, raw):
 
 def conver(item, templist, result,reserved_word):
     '''
-
     :param item: list or dict to be convert
     :param templist: a temp list
     :param result: every item in result is a convert result
@@ -196,7 +193,6 @@ def conver(item, templist, result,reserved_word):
 
 def json2list(jsonfile,reserved_word):
     '''
-
     :param jsonfile: dict come from json.dumps
     :return:a list, every item in this list is a list [key1,key2,...,keyn,value],
             it show the position of value in original json file
@@ -206,7 +202,7 @@ def json2list(jsonfile,reserved_word):
     conver(jsonfile,templist,result,reserved_word)
     return result
 
-# For Test Purpose
+
 def simplejsontest():
     reserved_word = 'PRIVACY_POLICY_JSON_PARSOR_LAYER_MARK'
 
@@ -266,5 +262,3 @@ if __name__ == '__main__':
     #test()
     #jsontest()
     simplejsontest()
-
-
