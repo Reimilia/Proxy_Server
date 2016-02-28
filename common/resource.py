@@ -27,7 +27,6 @@ def is_single_resource(Dict_Resource):
 
 
 def is_multi_resource(Dict_Resource):
-
     for key,value in BUNDLE_SIGNAL.iteritems():
         if key in Dict_Resource and Dict_Resource.get(key, 'Default') == value:
             return True

@@ -148,10 +148,16 @@ def filter_policy(resource, auth):
             pass
         else:
             resp=cover_protected_data(dict_resource, dict_resource, privacy_data)
-            print resp
+            #print resp
             wrapped_data= json.dumps(resp)
     elif is_multi_resource(dict_resource):
-        pass
+        for i in range(len(dict_resource['entry'])):
+            patient_ID = get_patient_ID(dict_resource['entry'][i]['resource'], auth)
+            privacy_data = get_policy_data(patient_ID, auth)
+            dict_resource['entry'][i]['resource']=cover_protected_data(dict_resource['entry'][i]['resource'],
+                                                                       dict_resource['entry'][i]['resource'], privacy_data)
+            #print dict_resource['entry'][i]['resource']
+            wrapped_data= json.dumps(dict_resource)
     else:
         #In this case it is worthless to bundle it
         pass
