@@ -7,7 +7,7 @@ So this file is designed solely intend to pass http request.
 import io
 import requests
 import json
-from config import SERVER_BASE
+from config import SERVER_BASE,PRIVACY_BASE
 from flask import Flask
 from flask import request,redirect
 from urllib import urlencode
@@ -58,14 +58,34 @@ def wrap_data(resource,auth_header):
         return resource._content
 
 
+# This api method is designed to get superadministrative access to Resources (i.e. all can be shwon)
+@dispatcher.route('/api/neprivacy/<path:request_url>', methods=KNOWN_HTTP_METHOD)
+def request_handler_noprivacy(request_url):
+    if request.method not in KNOWN_HTTP_METHOD:
+        raise ForwardError
+    auth_header= parse_request_headers()
+    resp = requests.request(method= request.method, url='%s/Privacy/%s?%s' %(PRIVACY_BASE,request_url,urlencode(request.args, doseq=True)), headers=auth_header, data=request.form)
+    try:
+        return resp._content
+    except:
+        raise UnderDevError
+
+
 @dispatcher.route('/api/<path:request_url>', methods=KNOWN_HTTP_METHOD)
 def request_handler(request_url):
+    '''
+    This is http forwarding part, yet it has little trick to wrap json data before
+    these resources was sent back
+    :param request_url:
+    :return:
+    '''
     if request.method not in KNOWN_HTTP_METHOD:
         raise ForwardError
     if request.method == 'GET':
         auth_header = parse_request_headers()
-        #print request.args
         resp = requests.get('%s/api/%s?%s' %(SERVER_BASE, request_url,urlencode(request.args,doseq=True)), headers=auth_header)
+        #Here is the API dealing with received resource of json data
+        # TO DO : xml parser is not tested well yet.
         return wrap_data(resp,auth_header)
     elif request.method == 'POST':
         auth_header = parse_request_headers()
@@ -81,6 +101,8 @@ def request_handler(request_url):
         return resp._content
     else:
         raise ForwardError
+
+
 
 
 @dispatcher.route('/auth/<path:request_url>', methods=KNOWN_HTTP_METHOD)
@@ -106,7 +128,7 @@ def request_forwarder(request_url):
 
 
 @dispatcher.route('/Privacy/<path:request_url>', methods = KNOWN_HTTP_METHOD)
-def privacy_request(request_url):
+def privacylist_request(request_url):
     '''
     Well, for request to Privacy_Server, at this proxy server we will only redirect and send request to
     remote Privacy_Server, and then send the response back to client side. The protection and management will
@@ -117,7 +139,25 @@ def privacy_request(request_url):
     if request.method not in KNOWN_HTTP_METHOD:
         raise ForwardError
     auth_header= parse_request_headers()
-    resp = requests.request(method= request.method, url='%s/privacy/%s?%s' %(SERVER_BASE,request_url,urlencode(request.args, doseq=True)), headers=auth_header, data=request.form)
+    resp = requests.request(method= request.method, url='%s/Privacy/%s?%s' %(PRIVACY_BASE,request_url,urlencode(request.args, doseq=True)), headers=auth_header, data=request.form)
+    try:
+        return resp._content
+    except:
+        raise UnderDevError
+
+@dispatcher.route('/Privacy', methods = KNOWN_HTTP_METHOD)
+def privacy_request():
+    '''
+    Well, for request to Privacy_Server, at this proxy server we will only redirect and send request to
+    remote Privacy_Server, and then send the response back to client side. The protection and management will
+    be settled in Privacy_Server
+    :param request_url:
+    :return:
+    '''
+    if request.method not in KNOWN_HTTP_METHOD:
+        raise ForwardError
+    auth_header= parse_request_headers()
+    resp = requests.request(method= request.method, url='%s/Privacy?%s' %(PRIVACY_BASE,urlencode(request.args, doseq=True)), headers=auth_header, data=request.form)
     try:
         return resp._content
     except:
