@@ -39,7 +39,7 @@ data that was wrapped up by this proxy server)
 ## How this works
 Although this proxy looks pretty simple and ugly and is not compatiable with some extreme circumstances,
 this is just make http-forwarding and do something before it forward the Response back to server
-
+ 
 ## Development Status and Further Extension
 
 - [x] **Proxy_Server (Which designed to forward requests and filter policy)**
