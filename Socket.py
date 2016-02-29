@@ -70,7 +70,6 @@ def request_handler_noprivacy(request_url):
     except:
         raise UnderDevError
 
-
 @dispatcher.route('/api/<path:request_url>', methods=KNOWN_HTTP_METHOD)
 def request_handler(request_url):
     '''

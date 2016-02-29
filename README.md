@@ -9,7 +9,7 @@ original server will still get the same result without any filterance.
     You need following parts to use this demo properly:
     *   client app
     *   [FHIR-Genomics-2](https://github.com/chaiery/FHIR-Genomics-2) or others acting as **Remote Server**
-    *   **Privacy_Server**(See [this one](https://github.com/Reimilia/Privacy_Server)
+    *   **Privacy_Server**(See [this one](https://github.com/Reimilia/Privacy_Server))
     *   This Proxy Server
     
 2. Deploy of this proxy server
@@ -18,9 +18,9 @@ original server will still get the same result without any filterance.
     components might be complex, please read their readmes carefully
     
     Simply do:
-    ```sudo pip install flask```
+    ```sudo pip install -r requirements.txt```
     
-    Also, it is always recommended to use ```virtualenv```
+    Also, it is always recommended to use ```virtualenv``` to deploy and make sandbox test.
     
 3. Setup redirect path
     You may change the url of servers in [config.py](./config.py)
