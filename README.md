@@ -39,3 +39,16 @@ data that was wrapped up by this proxy server)
 ## How this works
 Although this proxy looks pretty simple and ugly and is not compatiable with some extreme circumstances,
 this is just make http-forwarding and do something before it forward the Response back to server
+
+## Development Status and Further Extension
+
+- [x] **Proxy_Server (Which designed to forward requests and filter policy)**
+    - [x] http forwarding
+        - [x] Basic request forwarding with Oauth2.0 authetication headers
+        - [x] General Dispatching 
+    - [ ] http Response filtering
+        - [x] Wrap single patient resource (json)
+        - [ ] Wrap single patient-related resource (json) (*under development*)
+        - [x] Wrap multiple(bundled) resource (json)
+        - [ ] xml data parsing and wrapping
+    - [ ] X-Forwarded-For Hidding ( This means the client, if not parse http response thouroughly, will not know the real location of data server)
