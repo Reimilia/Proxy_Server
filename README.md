@@ -1,7 +1,8 @@
 # Proxy_Server
 
 The server designed to make privacy_policy applied at **Proxy Server** (i.e., all request to 
-original server will still get the same result without any filterance.
+original server will still get the same result without any filtering. However the client will recieve
+data that was wrapped up by this proxy server)
 
 ## How to use
 
