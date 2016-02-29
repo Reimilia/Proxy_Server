@@ -125,7 +125,12 @@ def cover_protected_data(dict_list, resource, privacy_policy, status='full'):
         # Not found or unmasked means we should not change the value
         if tmp[0] == 'Mask':
             # Here we need to filter the policy
+            keyword = data[i][-1]
             data[i][-1] = 'Protected data due to privacy policy'
+            for j in range(len(data)):
+                # This deals with a wrapped_up data that might potentially display at other locations
+                if data[j][-1].find(keyword) != -1:
+                    data[j][-1]=data[j][-1].replace(keyword, 'Protected')
 
     for i in range(len(data)):
         del data[i][0]
@@ -166,7 +171,7 @@ def filter_policy(resource, auth):
                 dict_resource['entry'][i]['resource']=cover_protected_data(dict_resource['entry'][i]['resource'],
                                                                        dict_resource['entry'][i]['resource'], privacy_data)
             #print dict_resource['entry'][i]['resource']
-            wrapped_data= json.dumps(dict_resource)
+        wrapped_data= json.dumps(dict_resource)
     else:
         #In this case it is worthless to bundle it
         pass
