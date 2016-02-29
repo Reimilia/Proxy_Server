@@ -4,6 +4,8 @@ import json
 from urllib import urlencode
 from . import SERVER_BASE,PRIVACY_BASE
 from resource import is_single_resource,is_multi_resource
+
+
 def get_patient_ID(dict_resource, auth_header):
     #resource is a dict data
     '''
@@ -49,7 +51,9 @@ def get_policy_data(patient_id, auth_header):
     try:
         return resp.json()['Resource']
     except:
+        # Did not find Privacy Resource
         return 'Nope'
+
 
 def retrieve(policy, raw):
     '''
@@ -69,16 +73,15 @@ def retrieve(policy, raw):
         return u'Not_Found',0
 
 
-
 def cover_protected_data(dict_list, resource, privacy_policy, status='full'):
     '''
-    :param display_list:
-    :param resource:
-    :param privacy_policy:
-    :param status:
-    :return:
+    This is where we wrap up json data with privacy_policy
+    :param dict_list: something the response contained
+    :param resource: something we get from data_server
+    :param privacy_policy: what we get from privacy_server
+    :param status: leave to extension
+    :return: parsered json data of dict_list after filtering
     '''
-
     policy_data = json2list(privacy_policy,RESERVED_WORD)
     json_reduce_structure(policy_data)
 
@@ -130,10 +133,12 @@ def cover_protected_data(dict_list, resource, privacy_policy, status='full'):
     result = list2json(data,RESERVED_WORD)
     return result
 
+
 def filter_policy(resource, auth):
     '''
+    Judge the type of response and deal with data_wrapper
     :param resource: the data send back to client
-    :param auth_header: this helps to make a legal http requesr
+    :param auth_header: this helps to make a legal http request
     :return:
     '''
     wrapped_data = resource
@@ -151,10 +156,14 @@ def filter_policy(resource, auth):
             #print resp
             wrapped_data= json.dumps(resp)
     elif is_multi_resource(dict_resource):
+        #Deal with bundled resource
         for i in range(len(dict_resource['entry'])):
             patient_ID = get_patient_ID(dict_resource['entry'][i]['resource'], auth)
             privacy_data = get_policy_data(patient_ID, auth)
-            dict_resource['entry'][i]['resource']=cover_protected_data(dict_resource['entry'][i]['resource'],
+            if type(privacy_data)==str and privacy_data=='Nope':
+                pass
+            else:
+                dict_resource['entry'][i]['resource']=cover_protected_data(dict_resource['entry'][i]['resource'],
                                                                        dict_resource['entry'][i]['resource'], privacy_data)
             #print dict_resource['entry'][i]['resource']
             wrapped_data= json.dumps(dict_resource)
@@ -163,3 +172,4 @@ def filter_policy(resource, auth):
         pass
 
     return wrapped_data
+

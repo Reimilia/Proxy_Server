@@ -17,8 +17,8 @@ if __name__ == '__main__':
         #print 'here'
         dispatcher.debug= True
         dispatcher.config['SECRET_KEY'] = 'hadjhkwh'
-        toolbar = DebugToolbarExtension()
-        toolbar.init_app(dispatcher)
+        #toolbar = DebugToolbarExtension()
+        #toolbar.init_app(dispatcher)
         dispatcher.run(port=PORT)
     else:
         #print 'there'

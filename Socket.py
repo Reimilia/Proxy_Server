@@ -2,6 +2,19 @@
 This is a http-forward server which wrap the json data with apply of privacy_policy
 To security, we separate this proxy with original server and privacy_server.
 So this file is designed solely intend to pass http request.
+
+It deals with several circumstances:
+
+for auth request, simply redirect or send http request forwarding
+for api request, check the get response and pick up those resource seperately as either a single one
+or multiple bundles. If it is a patient-related resource, we can ask privacy_policy from privacy_server
+and wrap it into json_data
+
+To use this proxy_server, just let client apps point to this base_url (http://localhost:9090 in this demo)
+the app will see exactly the same thing as did before but some patient privacy_policy will "forbid" client
+from get full responded data.
+
+TODO : xml parsing support (to wrap up xml data)
 '''
 
 import io
@@ -19,13 +32,22 @@ KNOWN_HTTP_METHOD=['GET','POST','PUT','DELETE']
 MUST_PARSE_ARGS_HEADER=['Authorization','Accept']
 
 class ForwardError(Exception):
+    '''
+    Leave to extension: Forward Error
+    '''
     pass
 
 class UnderDevError(Exception):
+    '''
+    This is just an Error Type
+    '''
     pass
 
 def parse_request_headers():
-    #print request.headers
+    '''
+    Here we need to parse auth_headers from client apps
+    :return: request.headers
+    '''
     headers = {}
     for k,v in request.headers:
         if k in MUST_PARSE_ARGS_HEADER:
