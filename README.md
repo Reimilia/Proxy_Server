@@ -24,15 +24,15 @@ data that was wrapped up by this proxy server)
     Also, it is always recommended to use ```virtualenv``` to deploy and make sandbox test.
     
 3. Setup redirect path
-    You may change the url of servers in [config.py](./config.py)
+    You may change the url of servers in config.py
     PRIVACY_BASE : base url to redirect to the **Privacy_server**
     SERVER_BASE : base url to redirect to the remote data server
 
-4. Run [server_index.py](./server_index.py) to setup proxy server
+4. Run server_index.py to setup proxy server
 
 5. Make sure 4 parts are ready, and run your client app with reidrect path:
-<center>http://localhost:9090 </center>
-   Then the proxy server will automaticlly use data in privacy_server and wrap the json data from
+<center>```http://localhost:9090 ```</center>
+   Then the proxy server will automatically use data in privacy_server and wrap the json data from
    remote server.
 
 
