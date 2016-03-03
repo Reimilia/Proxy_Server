@@ -107,9 +107,9 @@ def cover_protected_data(dict_list, resource, privacy_policy, status='all'):
 
     for i in range(len(data)):
         data[i].insert(0,s)
-    print resource
-    print data
-    print policy_data
+    #print resource
+    #print data
+    #print policy_data
     #If the query is only part of data,then do the intersection
     for i in range(len(data)):
         if data[i][1] == 'text' or data[i][1] == 'resourceType':
