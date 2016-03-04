@@ -86,7 +86,8 @@ def request_handler_noprivacy(request_url):
     if request.method not in KNOWN_HTTP_METHOD:
         raise ForwardError
     auth_header= parse_request_headers()
-    resp = requests.request(method= request.method, url='%s/Privacy/%s?%s' %(PRIVACY_BASE,request_url,urlencode(request.args, doseq=True)), headers=auth_header, data=request.form)
+    resp = requests.request(method= request.method, url='%s/api/%s?%s' %(SERVER_BASE,request_url,urlencode(request.args, doseq=True)), headers=auth_header, data=request.form)
+    #print '%s/api/%s?%s' %(PRIVACY_BASE,request_url,urlencode(request.args, doseq=True))
     try:
         return resp._content
     except:
