@@ -8,7 +8,7 @@ data that was wrapped up by this proxy server)
 
 1. Base Setup
     You need following parts to use this demo properly:
-    *   client app
+    *   client app ( We use [this one] https://github.com/JohnsonChern/Privacy_Server))
     *   [FHIR-Genomics-2](https://github.com/chaiery/FHIR-Genomics-2) or others acting as **Remote Server**
     *   **Privacy_Server**(See [this one](https://github.com/Reimilia/Privacy_Server))
     *   This Proxy Server
