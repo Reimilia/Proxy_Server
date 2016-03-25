@@ -20,17 +20,21 @@ TODO : xml parsing support (to wrap up xml data)
 import io
 import requests
 import json
+import xmltodict as xml
+
 from config import SERVER_BASE,PRIVACY_BASE
 from flask import Flask
 from flask import request,redirect,make_response,after_this_request
 from urllib import urlencode
 from common import filter_policy
 
+
 dispatcher = Flask(__name__)
 
 KNOWN_HTTP_METHOD=['GET','POST','PUT','DELETE']
 MUST_PARSE_ARGS_HEADER=['Authorization','Accept']
-KNOWN_JSON_TYPE=['MIMETYPE-JSON']
+KNOWN_JSON_TYPE=['application/json']
+KNOWN_XML_TYPE=['application/xml','application/xml; charset=utf-8']
 
 class ForwardError(Exception):
     '''
@@ -71,21 +75,25 @@ def wrap_data(resource,auth_header):
     # Response class
     if (resource.status_code!= 200):
         return resource._content
-    #if (resource.headers['Content-type'] in KNOWN_JSON_TYPE):
-    #   Do this as json
-    #elif (resource.headers['Content-type'] in KNOWN_XML_TYPE):
-    #   Do this as xml
-    #else:
-    #   Do this with ....
-    try:
-        #print type(resource._content)
-        #print type(json.dumps(resource.json()))
-        #return json.dumps(resource.json())
-        wrapped_content=filter_policy(json.dumps(resource.json()),auth_header)
-        return wrapped_content
-    except:
-        resp = make_response();
-        return resource._content
+    print resource.headers['Content-type']
+    if (resource.headers['Content-type'] in KNOWN_JSON_TYPE):
+        # Do as json-type
+        try:
+            wrapped_content=filter_policy(json.dumps(resource.json()),auth_header)
+            return wrapped_content
+        except:
+            return resource._content
+    elif (resource.headers['Content-type'] in KNOWN_XML_TYPE):
+        # Do as xml-data ,with the help of xmltodict
+        try:
+            json_data = xml.parse(resource._content, process_namespaces=True)
+            wrapped_content=filter_policy(json_data,auth_header)
+            return wrapped_content
+        except:
+            return resource._content
+    else:
+        raise ForwardError
+
 
 
 # This api method is designed to get superadministrative access to Resources (i.e. all can be shwon)
@@ -96,6 +104,7 @@ def request_handler_noprivacy(request_url):
     def add_header(response):
         try:
             response.headers['Content-type'] = resp.headers['Content-type']
+            response.headers['HOST'] = resp.headers['HOST']
         except:
             pass
         return response
@@ -123,6 +132,7 @@ def request_handler(request_url):
     def add_header(response):
         try:
             response.headers['Content-type'] = resp.headers['Content-type']
+            response.headers['HOST'] = resp.headers['HOST']
         except:
             pass
         return response
