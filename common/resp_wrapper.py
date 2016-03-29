@@ -52,6 +52,7 @@ def get_patient_ID(dict_resource, auth_header):
             patient_id = dict_resource['subject']['reference'].split('/')[1]
         else:
             patient_id = get_seq_id(dict_resource)'''
+    #print dict_resource
     if 'id' in dict_resource:
         patient_id = dict_resource['id']
     elif 'Identifier' in dict_resource:
@@ -71,6 +72,7 @@ def get_policy_data(patient_id, auth_header):
     forwarded_args['_format'] = 'json'
     api_endpoint = 'Privacy/%s?%s' % (patient_id, urlencode(forwarded_args, doseq=True))
     resp = api_call(PRIVACY_BASE,api_endpoint, auth_header)
+    #print patient_id,resp._content
     try:
         return resp.json()['Resource']
     except:
@@ -146,9 +148,11 @@ def cover_protected_data(dict_list, resource, privacy_policy, status='all'):
     #        data[i][-1] = 'Not in the online record'
     #    else:
     #        data[i][-1] = tmp[1]
+    #print data
+    #print policy_data
+    #print '\n'
 
-    print policy_data
-    print '\n'
+
     for i in range(len(data)):
         if data[i][1]=='text' or data[i][1]=='resourceType':
             continue
@@ -159,13 +163,16 @@ def cover_protected_data(dict_list, resource, privacy_policy, status='all'):
         if tmp[0] == 'Mask':
             # Here we need to filter the policy
             keyword = data[i][-1]
-            print keyword
+            #print keyword
             #data[i][-1] = 'Protected data to %s User' % status
             for j in range(len(data)):
                 # This deals with a wrapped_up data that might potentially display at other locations
-                if data[j][-1].find(keyword) != -1:
-                    data[j][-1]=data[j][-1].replace(keyword, 'Hide to %s User' % status)
+                if data[j][-1].find(keyword) != -1 and data[j][-1].find('http') == -1:
+                    data[j][-1]="Hide due to sensitive information (concerning with patient's policy)"
+            #print data[i]
             data[i]= data[i][0:tmp[2]]
+            #print data[i]
+            #print '\n'
             data[i][-1]= 'Protected data to %s User' % status
 
     for i in range(len(data)):
@@ -174,8 +181,11 @@ def cover_protected_data(dict_list, resource, privacy_policy, status='all'):
     for dat in data:
         if dat not in new_data:
             new_data.append(dat)
-    result = list2json(new_data,RESERVED_WORD)
+    result =list2json(new_data,RESERVED_WORD)
+
     print result
+    #if(result['id']=='ob-genetics-2'):
+    #    print result
     return result
 
 
@@ -188,14 +198,14 @@ def filter_policy(resource, auth):
     '''
     wrapped_data = resource
     dict_resource = json.loads(resource)
-
+    #print dict_resource
     # Judge type of bundled resource
     if is_single_resource(dict_resource):
         #Deal with a single resource
         patient_ID = get_patient_ID(dict_resource, auth)
         #print patient_ID
         privacy_data = get_policy_data(patient_ID, auth)
-        print privacy_data
+        #print privacy_data
         if type(privacy_data)==str and privacy_data=='Nope':
             pass
         else:
@@ -204,15 +214,20 @@ def filter_policy(resource, auth):
                 # to match up , we need to formalize the format of policy_data
                 canonical_format = {v['Policy_ResourceType'] : v['Policy']}
                 #print v
-                #print type(canonical_format)
+                print canonical_format
                 stat = v['Scope']
                 resp=cover_protected_data(resp, resp, canonical_format, status= stat)
             wrapped_data= json.dumps(resp)
     elif is_multi_resource(dict_resource):
         #Deal with bundled resource
+        #print "here\n\n"
+        #print len(dict_resource['entry'])
         for i in range(len(dict_resource['entry'])):
+            #print i
             patient_ID = get_patient_ID(dict_resource['entry'][i]['resource'], auth)
             privacy_data = get_policy_data(patient_ID, auth)
+            #print patient_ID,privacy_data
+            #print "\n"
             if type(privacy_data)==str and privacy_data=='Nope':
                 pass
             else:
@@ -220,9 +235,10 @@ def filter_policy(resource, auth):
                 #print type(privacy_data)
                 for key, v in privacy_data.items():
                     # to match up , we need to formalize the format of policy_data
-                    canonical_format = {v['Policy_ResourceType'] : json.loads( v['Policy'])}
+                    canonical_format = {v['Policy_ResourceType'] : v['Policy']}
                     stat = v['Scope']
                     resp=cover_protected_data(resp, resp, canonical_format, status= stat)
+                    print resp
                 dict_resource['entry'][i]['resource'] = resp
             #print dict_resource['entry'][i]['resource']
         wrapped_data= json.dumps(dict_resource)

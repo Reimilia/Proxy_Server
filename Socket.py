@@ -78,6 +78,7 @@ def wrap_data(resource,auth_header):
     print resource.headers['Content-type']
     if (resource.headers['Content-type'] in KNOWN_JSON_TYPE):
         # Do as json-type
+        #print "1\n"
         try:
             wrapped_content=filter_policy(json.dumps(resource.json()),auth_header)
             return wrapped_content
